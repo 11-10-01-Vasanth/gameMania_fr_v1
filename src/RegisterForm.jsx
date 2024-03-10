@@ -58,29 +58,33 @@ const RegisterForm = () => {
 
   return (
     <div
-      className="d-flex flex-column justify-content-center align-items-center vh-100"
-      style={{ backgroundColor: "rgb(29,32,51)" }}
+      className="d-flex flex-column justify-content-center align-items-center"
+      style={{ backgroundColor: "#ecf0f1", height: "100vh" }}
     >
       <div
         style={{
-          backgroundColor: "rgb(29,32,51)", // Background color of the box
+          backgroundColor: "#bdc3c7", // Background color of the box
           padding: "20px", // Padding inside the box
           borderRadius: "10px", // Rounded corners
           boxShadow: "0 4px 8px rgba(0.5, 0.5, 0.5, .5)", // Shadow effect
         }}
       >
         <div className="text-center">
-          <Button className="fs-2 mb-3" variant="outline-light">
+          <Button className="fs-2 mb-3" variant="outline-dark">
             <i class="bi bi-person-check"></i>
           </Button>
         </div>
-        <div className="text-white text-center mb-3">
+        <div className="text-dark text-center mb-3">
           <h1>Sign-Up</h1>
         </div>
         <Form noValidate validated={validated} onSubmit={handleRegister}>
           <Row className="mb-3 d-flex justify-content-center">
-            <Form.Group as={Col} md="8" controlId="validationCustom01">
-              <Form.Label className="text-light">Username</Form.Label>
+            <Form.Group
+              as={Col}
+              md="8"
+              controlId="validationCustom01"
+              className="mt-3"
+            >
               <Form.Control
                 type="text"
                 placeholder="Username"
@@ -90,17 +94,21 @@ const RegisterForm = () => {
                 required
                 style={{
                   backgroundColor: "transparent",
-                  borderColor: "#ced4da",
+                  borderColor: "white",
                   color: "white",
-                  "::placeholder": { color: "white" },
+                  "::placeholder": { color: "black" },
                 }}
               />
               <Form.Control.Feedback type="invalid" className="text-warning">
                 Please provide a username.
               </Form.Control.Feedback>
             </Form.Group>
-            <Form.Group as={Col} md="8" controlId="validationCustom02">
-              <Form.Label className="text-light mt-3">Email</Form.Label>
+            <Form.Group
+              as={Col}
+              md="8"
+              controlId="validationCustom02"
+              className="mt-5"
+            >
               <Form.Control
                 type="email"
                 placeholder="Email"
@@ -110,18 +118,23 @@ const RegisterForm = () => {
                 required
                 style={{
                   backgroundColor: "transparent",
-                  borderColor: "#ced4da",
+                  borderColor: "white",
                   color: "white",
-                  "::placeholder": { color: "white" },
+                  "::placeholder": { color: "black" },
                 }}
               />
               <Form.Control.Feedback type="invalid" className="text-warning">
                 Please provide an email.
               </Form.Control.Feedback>
             </Form.Group>
-            <Form.Group as={Col} md="8" controlId="validationCustom03">
+            <Form.Group
+              as={Col}
+              md="8"
+              controlId="validationCustom03"
+              className="mt-5"
+            >
               {/* Password Form Label */}
-              <Form.Label className="text-light mt-3">Password</Form.Label>
+
               {/* Password Form Control */}
               <InputGroup>
                 <Form.Control
@@ -133,9 +146,9 @@ const RegisterForm = () => {
                   required
                   style={{
                     backgroundColor: "transparent",
-                    borderColor: "#ced4da",
+                    borderColor: "white",
                     color: "white",
-                    "::placeholder": { color: "white" },
+                    "::placeholder": { color: "black" },
                   }}
                 />
                 <Button
@@ -152,7 +165,7 @@ const RegisterForm = () => {
           </Row>
           <Form.Group className="text-white mb-3 d-flex justify-content-center align-items-center">
             <Form.Check
-              label="Agree to terms and conditions"
+              label="Remember me"
               feedback="You must agree before submitting."
               feedbackType="invalid"
               name="agreed"

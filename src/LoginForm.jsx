@@ -23,6 +23,9 @@ const LoginForm = () => {
     const { name, value, type, checked } = event.target;
     const val = type === "checkbox" ? checked : value;
     setLoginData({ ...loginData, [name]: val });
+    if (name === "agreed" && checked) {
+      event.target.setCustomValidity("");
+    }
   };
 
   const handleLogin = (event) => {
@@ -57,33 +60,35 @@ const LoginForm = () => {
 
   return (
     <div
-      className="d-flex justify-content-center align-items-center vh-100"
-      style={{ backgroundColor: "rgb(29,32,51)" }}
+      className="d-flex justify-content-center align-items-center"
+      style={{ backgroundColor: "#ecf0f1", height: "auto" }}
     >
       <div
         style={{
-          backgroundColor: "rgb(29,32,51)", // Background color of the box
+          backgroundColor: "#bdc3c7", // Background color of the box
           padding: "20px", // Padding inside the box
           borderRadius: "10px", // Rounded corners
           boxShadow: "0 4px 8px rgba(0.5, 0.5, 0.5, .5)", // Shadow effect
         }}
       >
         <div className="text-center">
-          <Button className="fs-2 mb-3" variant="outline-light">
+          <Button className="fs-2 mb-3" variant="outline-dark">
             <i className="bi bi-person-circle"></i>
           </Button>
         </div>
 
-        <div className="text-white text-center mb-3">
+        <div className="text-dark text-center mb-3">
           <h1>Sign-In</h1>
         </div>
         <Form noValidate validated={validated} onSubmit={handleLogin}>
           <Row className="mb-3 d-flex justify-content-center">
             {/* Username Form Group */}
-            <Form.Group as={Col} md="8" controlId="validationCustom01">
-              {/* Username Form Label */}
-              <Form.Label className="text-light mb-3">Username</Form.Label>
-              {/* Username Form Control */}
+            <Form.Group
+              as={Col}
+              md="8"
+              controlId="validationCustom01"
+              className="mt-3"
+            >
               <Form.Control
                 type="text"
                 placeholder="Username"
@@ -93,9 +98,9 @@ const LoginForm = () => {
                 required
                 style={{
                   backgroundColor: "transparent",
-                  borderColor: "#ced4da",
+                  borderColor: "white",
                   color: "white",
-                  "::placeholder": { color: "white" },
+                  "::placeholder": { color: "black" },
                 }}
               />
               {/* Username Form Feedback */}
@@ -105,10 +110,12 @@ const LoginForm = () => {
             </Form.Group>
 
             {/* Password Form Group */}
-            <Form.Group as={Col} md="8" controlId="validationCustom02">
-              {/* Password Form Label */}
-              <Form.Label className="text-light mt-3">Password</Form.Label>
-              {/* Password Form Control */}
+            <Form.Group
+              as={Col}
+              md="8"
+              controlId="validationCustom02"
+              className="mt-5"
+            >
               <InputGroup>
                 <Form.Control
                   type={showPassword ? "text" : "password"}
@@ -119,33 +126,31 @@ const LoginForm = () => {
                   required
                   style={{
                     backgroundColor: "transparent",
-                    borderColor: "#ced4da",
+                    borderColor: "white",
                     color: "white",
-                    "::placeholder": { color: "white" },
+                    "::placeholder": { color: "black" },
                   }}
                 />
                 <Button
                   variant="outline-light"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ?  <BiShow /> : <BiHide />}
+                  {showPassword ? <BiShow /> : <BiHide />}
                 </Button>
                 <Form.Control.Feedback type="invalid" className="text-warning">
-                Please provide a password.
-              </Form.Control.Feedback>
+                  Please provide a password.
+                </Form.Control.Feedback>
               </InputGroup>
             </Form.Group>
           </Row>
 
           {/* Terms and Conditions Form Group */}
-          <Form.Group className="text-light mb-3 d-flex justify-content-center align-items-center">
-            {/* Terms and Conditions Form Check */}
+          <Form.Group className="text-white mb-3 d-flex justify-content-center align-items-center">
             <Form.Check
-              label="Agree to terms and conditions"
+              label="Remember me"
               feedback="You must agree before submitting."
               feedbackType="invalid"
               name="agreed"
-              className="mb-4"
               checked={loginData.agreed}
               onChange={handleChange}
               required
