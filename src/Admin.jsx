@@ -1,6 +1,9 @@
 import { useState } from "react";
+import Button from "react-bootstrap/Button";
+// import "./Admin.css";
 
 function Admin() {
+  const [selectedImage, setSelectedImage] = useState(null);
   const [avdata, setavdata] = useState({
     gametitle: "",
     discount: "",
@@ -8,127 +11,148 @@ function Admin() {
     discountprice: "",
     imgUrl: "",
   });
-
-  const [selectedImage, setSelectedImage] = useState(null);
-
-  const handleFile = () => {
-    console.log("hello world");
-    const formData = new FormData();
-    formData.append("file", selectedImage);
-
-    fetch("http://localhost:2001/file/upload", {
-      method: "POST",
-      body: formData,
-      dataType: "jsonp",
-    })
-      .then((response) => response.text())
-      .then((text) => {
-        avdata.imgUrl = text;
-        console.log(avdata.imgUrl);
-      });
-  };
-
   const handleChange = (event) => {
     const { name, value } = event.target;
     setavdata({ ...avdata, [name]: value });
     console.log(name, value);
   };
-
-  const handleData = (event) => {
-    const game = {
+  const submitProduct = () => {
+    const product = {
       gametitle: avdata.gametitle,
       discount: avdata.discount,
       price: avdata.price,
       discountprice: avdata.discountprice,
       imgUrl: avdata.imgUrl,
     };
-    event.preventDefault();
-    fetch(`http://localhost:2001/avgames/setgamedata`, {
+    fetch("http://localhost:2001/avgames/setgamedata", {
       headers: {
         "Content-Type": "application/json",
       },
+      method: "post",
+      body: JSON.stringify(product),
+    }).then((response) => {
+      console.log("Data Received " + response);
+    });
+  };
+  const handleFile = () => {
+    console.log("hello world");
+    const formData = new FormData();
+    formData.append("file", selectedImage);
+    // formData.append("text", avdata);
+    // console.log(formData);
+    // for(var i in formData.entries()){
+    //   console.log(i[0],i[1],"Formdata")
+    // }
+    fetch("http://localhost:2001/file/upload", {
       method: "POST",
-      body: JSON.stringify(game),
+      body: formData,
+      dataType: "jsonp",
     })
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Error Found");
+          throw new Error("Image upload failed");
         }
-        return response.json();
+        return response.text();
       })
-      .then((data) => {
-        setavdata(data);
-        console.log(data);
+      .then((text) => {
+        // setData({ ...data, Valimage: text });
+        avdata.imgUrl = text;
+        console.log(text);
+      })
+      .catch((error) => {
+        console.error("Error uploading image:", error);
       });
   };
   return (
     <div>
-      <div className="text-center">Add Game details</div>
-      <form onSubmit={handleData}>
-        <div>
-          <label>Gametitle</label>
+      <div className="ad">
+        <h1 className="text-center">Add a Product</h1>
+        <div className="pr">
+          <h3>Gametitle</h3>
           <input
             type="text"
             name="gametitle"
             value={avdata.gametitle}
             onChange={handleChange}
+            style={{ border: "2px solid black" }}
           />
-        </div>
-        <div>
-          <label>Discount</label>
+        </div>{" "}
+        <br></br>
+        <div className="pr">
+          <h3>Discount</h3>
           <input
             type="text"
             name="discount"
+            style={{ border: "2px solid black" }}
             value={avdata.discount}
             onChange={handleChange}
           />
-        </div>
-        <div>
-          <label>Price</label>
+        </div>{" "}
+        <br></br>
+        <div className="pr">
+          <h3>Price</h3>
           <input
             type="text"
             name="price"
             value={avdata.price}
             onChange={handleChange}
+            style={{ border: "2px solid black" }}
           />
-        </div>
-        <div>
-          <label>DiscountPrice</label>
+        </div>{" "}
+        <br></br>
+        <div className="pr">
+          <h3>DiscountPrice</h3>
           <input
             type="text"
             name="discountprice"
             value={avdata.discountprice}
             onChange={handleChange}
+            style={{ border: "2px solid black" }}
           />
-        </div>
-        <div>
-          {selectedImage && (
-            <div>
-              <img
-                alt="not found"
-                width={"250px"}
-                src={URL.createObjectURL(selectedImage)}
-              />
-              <br />
-              <button onClick={() => setSelectedImage(null)}>Remove</button>
-              <button onClick={handleFile}>Upload</button>
-            </div>
-          )}
-          <br />
-          <br />
+        </div>{" "}
+        <br></br>
+        <div className="pr">
+          <div>
+            {selectedImage && (
+              <div className="text-center">
+                <img
+                  alt="not found"
+                  width={"200px"}
+                  height={"270px"}
+                  src={URL.createObjectURL(selectedImage)}
+                  // src={http://localhost:8080/product/set${data.valImage}}
+                />
+                <br />
+                <Button variant="danger" onClick={() => setSelectedImage(null)}>
+                  Remove
+                </Button>
+                &nbsp;&nbsp;
+                <Button variant="warning" onClick={handleFile}>
+                  Upload
+                </Button>
+              </div>
+            )}
+            <br />
+            <br />
 
-          <input
-            type="file"
-            name="imgUrl"
-            value={avdata.imgUrl}
-            onChange={(event) => {
-              console.log(event.target.files[0]);
-              setSelectedImage(event.target.files[0]);
-            }}
-          />
+            <input
+              type="file"
+              name="imgUrl"
+              value={avdata.imgUrl}
+              onChange={(event) => {
+                console.log(event.target.files[0],"File");
+                setSelectedImage(event.target.files[0]);
+              }}
+            />
+          </div>
         </div>
-        <button type="submit">Add</button>
-      </form>
+        {/* <input type="button" value="Add Product"  /> */}
+        <div className="text-center">
+          <Button variant="danger" onClick={submitProduct}>
+            Add Product
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

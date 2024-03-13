@@ -160,7 +160,7 @@ function Avilablegame() {
                 <Card style={{ width: "18rem" }} className="bg-transparent">
                   <Card.Img
                     variant="top"
-                    src={arr.imgUrl}
+                    src={ "http://localhost:2001/uploads/" + arr.imgUrl}
                     style={{ height: "400px" }}
                   />
                   <Card.Body className="bg-transparent">
