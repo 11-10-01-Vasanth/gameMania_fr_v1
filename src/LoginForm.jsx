@@ -41,7 +41,6 @@ const LoginForm = () => {
       )
         .then((response) => {
           if (!response.ok) {
-            alert("Enter Valid");
             throw new Error("Failed to fetch data from server");
           }
           return response.json();
@@ -61,7 +60,7 @@ const LoginForm = () => {
   return (
     <div
       className="d-flex justify-content-center align-items-center"
-      style={{ backgroundColor: "#ecf0f1", height: "auto" }}
+      style={{ backgroundColor: "#ecf0f1", height: "100vh" }}
     >
       <div
         style={{
