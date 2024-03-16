@@ -4,7 +4,11 @@ import Button from "react-bootstrap/Button";
 
 function Admin() {
   const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImg, setSelectedImg] = useState(null);
   const [avdata, setavdata] = useState({
+    imageUrl:""
+  });
+  const [avdt, setavdt] = useState({
     gametitle: "",
     discount: "",
     price: "",
@@ -16,8 +20,8 @@ function Admin() {
     setavdata({ ...avdata, [name]: value });
     console.log(name, value);
   };
-  const submitProduct = () => {
-    const product = {
+  const submitData = () => {
+    const game = {
       gametitle: avdata.gametitle,
       discount: avdata.discount,
       price: avdata.price,
@@ -29,7 +33,7 @@ function Admin() {
         "Content-Type": "application/json",
       },
       method: "post",
-      body: JSON.stringify(product),
+      body: JSON.stringify(game),
     }).then((response) => {
       console.log("Data Received " + response);
     });
@@ -57,6 +61,36 @@ function Admin() {
       .then((text) => {
         // setData({ ...data, Valimage: text });
         avdata.imgUrl = text;
+        console.log(text);
+      })
+      .catch((error) => {
+        console.error("Error uploading image:", error);
+      });
+  };
+
+  const handleImage = () => {
+    console.log("hello world");
+    const formData = new FormData();
+    formData.append("file", selectedImg);
+    // formData.append("text", avdata);
+    // console.log(formData);
+    // for(var i in formData.entries()){
+    //   console.log(i[0],i[1],"Formdata")
+    // }
+    fetch("http://localhost:2001/file/uploadimg", {
+      method: "POST",
+      body: formData,
+      dataType: "jsonp",
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Image upload failed");
+        }
+        return response.text();
+      })
+      .then((text) => {
+        // setData({ ...data, Valimage: text });
+        avdata.imageUrl = text;
         console.log(text);
       })
       .catch((error) => {
@@ -120,7 +154,6 @@ function Admin() {
                   width={"200px"}
                   height={"270px"}
                   src={URL.createObjectURL(selectedImage)}
-                  // src={http://localhost:8080/product/set${data.valImage}}
                 />
                 <br />
                 <Button variant="danger" onClick={() => setSelectedImage(null)}>
@@ -140,7 +173,7 @@ function Admin() {
               name="imgUrl"
               value={avdata.imgUrl}
               onChange={(event) => {
-                console.log(event.target.files[0],"File");
+                console.log(event.target.files[0], "File");
                 setSelectedImage(event.target.files[0]);
               }}
             />
@@ -148,7 +181,7 @@ function Admin() {
         </div>
         {/* <input type="button" value="Add Product"  /> */}
         <div className="text-center">
-          <Button variant="danger" onClick={submitProduct}>
+          <Button variant="danger" onClick={submitData}>
             Add Product
           </Button>
         </div>

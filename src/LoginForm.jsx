@@ -1,17 +1,27 @@
 import React, { useState } from "react";
 import Button from "react-bootstrap/Button";
-import { Container, Row, Col } from "react-bootstrap";
+import { Row, Col } from "react-bootstrap";
 import Form from "react-bootstrap/Form";
 import { InputGroup } from "react-bootstrap";
 import { BiShow, BiHide } from "react-icons/bi";
+import { useNavigate } from "react-router-dom";
+import * as formik from "formik";
+import * as yup from "yup";
+import Nav from "react-bootstrap/Nav";
 
 const LoginForm = () => {
+  const { Formik } = formik;
+  const navigate = useNavigate();
+
+  const schema = yup.object().shape({
+    username: yup.string().required(),
+    password: yup.string().required(),
+  });
+
   const [loginData, setLoginData] = useState({
     username: "",
     password: "",
-    agreed: false, // Added state for terms agreement
   });
-  const [validated, setValidated] = useState(false); // State for form validation
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -19,42 +29,37 @@ const LoginForm = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleChange = (event) => {
-    const { name, value, type, checked } = event.target;
-    const val = type === "checkbox" ? checked : value;
-    setLoginData({ ...loginData, [name]: val });
-    if (name === "agreed" && checked) {
-      event.target.setCustomValidity("");
-    }
-  };
-
-  const handleLogin = (event) => {
-    event.preventDefault();
-    const form = event.currentTarget;
-
-    if (form.checkValidity() === false) {
-      event.stopPropagation();
-    } else {
-      // Proceed with fetch request
-      fetch(
-        `http://localhost:2001/register/check?username=${loginData.username}&password=${loginData.password}`
-      )
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Failed to fetch data from server");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          setLoginData(data);
-          console.log(data);
-        })
-        .catch((error) => {
-          console.error("Error", error);
-        });
-      console.log("Logging in...");
-    }
-    setValidated(true); // Set validated to true after form submission
+  const handleSubmit = (val, { setSubmitting }) => {
+    // event.preventDefault();
+    console.log("SUBMITTING FORM:", val);
+    fetch("http://localhost:2001/register/login", {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "post",
+      body: JSON.stringify(val),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch data");
+        }
+        return response.json();
+      })
+      .then((response) => {
+        if (response == true) {
+          console.log("the Fectched data is", response);
+          setLoginData(response);
+          navigate("/");
+        } else {
+          alert("Invalid login data");
+        }
+      })
+      .catch((e) => {
+        console.log("error", e);
+      })
+      .finally(() => {
+        setSubmitting(false);
+      });
   };
 
   return (
@@ -79,90 +84,95 @@ const LoginForm = () => {
         <div className="text-dark text-center mb-3">
           <h1>Sign-In</h1>
         </div>
-        <Form noValidate validated={validated} onSubmit={handleLogin}>
-          <Row className="mb-3 d-flex justify-content-center">
-            {/* Username Form Group */}
-            <Form.Group
-              as={Col}
-              md="8"
-              controlId="validationCustom01"
-              className="mt-3"
-            >
-              <Form.Control
-                type="text"
-                placeholder="Username"
-                name="username"
-                value={loginData.username}
-                onChange={handleChange}
-                required
-                style={{
-                  backgroundColor: "transparent",
-                  borderColor: "white",
-                  color: "white",
-                  "::placeholder": { color: "black" },
-                }}
-              />
-              {/* Username Form Feedback */}
-              <Form.Control.Feedback type="invalid" className="text-warning">
-                Please provide a username.
-              </Form.Control.Feedback>
-            </Form.Group>
+        <div>
+          <Formik
+            validationSchema={schema}
+            onSubmit={handleSubmit}
+            initialValues={{
+              username: "",
+              password: "",
+            }}
+          >
+            {({ handleSubmit, handleChange, values, touched, errors }) => (
+              <Form noValidate onSubmit={handleSubmit}>
+                <Row className="mb-3 d-flex justify-content-center">
+                  {/* Username Form Group */}
+                  <Form.Group
+                    as={Col}
+                    md="8"
+                    controlId="validationCustom01"
+                    className="mt-3"
+                  >
+                    <Form.Control
+                      type="text"
+                      placeholder="Username"
+                      name="username"
+                      value={values.username}
+                      onChange={handleChange}
+                      isInvalid={!!errors.username}
+                      style={{
+                        backgroundColor: "transparent",
+                        borderColor: "white",
+                        color: "white",
+                        "::placeholder": { color: "black" },
+                      }}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.username}
+                    </Form.Control.Feedback>
+                  </Form.Group>
 
-            {/* Password Form Group */}
-            <Form.Group
-              as={Col}
-              md="8"
-              controlId="validationCustom02"
-              className="mt-5"
-            >
-              <InputGroup>
-                <Form.Control
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Password"
-                  name="password"
-                  value={loginData.password}
-                  onChange={handleChange}
-                  required
-                  style={{
-                    backgroundColor: "transparent",
-                    borderColor: "white",
-                    color: "white",
-                    "::placeholder": { color: "black" },
-                  }}
-                />
-                <Button
-                  variant="outline-light"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <BiShow /> : <BiHide />}
-                </Button>
-                <Form.Control.Feedback type="invalid" className="text-warning">
-                  Please provide a password.
-                </Form.Control.Feedback>
-              </InputGroup>
-            </Form.Group>
-          </Row>
-
-          {/* Terms and Conditions Form Group */}
-          <Form.Group className="text-white mb-3 d-flex justify-content-center align-items-center">
-            <Form.Check
-              label="Remember me"
-              feedback="You must agree before submitting."
-              feedbackType="invalid"
-              name="agreed"
-              checked={loginData.agreed}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-
-          {/* Submit Button */}
-          <div className="text-center">
-            <Button type="submit" variant="outline-light">
-              Sign In
-            </Button>
-          </div>
-        </Form>
+                  {/* Password Form Group */}
+                  <Form.Group
+                    as={Col}
+                    md="8"
+                    controlId="validationCustom02"
+                    className="mt-5"
+                  >
+                    <InputGroup>
+                      <Form.Control
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Password"
+                        name="password"
+                        value={values.password}
+                        onChange={handleChange}
+                        isInvalid={!!errors.password}
+                        style={{
+                          backgroundColor: "transparent",
+                          borderColor: "white",
+                          color: "white",
+                          "::placeholder": { color: "black" },
+                        }}
+                      />
+                      <Button
+                        variant="outline-light"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <BiShow /> : <BiHide />}
+                      </Button>
+                      <Form.Control.Feedback type="invalid">
+                        {errors.password}
+                      </Form.Control.Feedback>
+                    </InputGroup>
+                  </Form.Group>
+                </Row>
+                <div className="text-center">
+                  <div className="d-flex justify-content-center align-items-center mb-3">
+                    <div className="text-light">Don't have an account?</div>
+                    <div>
+                      <Nav.Link className="text-dark" href="/registerform">
+                        <i className="bi bi-person-fill-add fs-3"></i>
+                      </Nav.Link>
+                    </div>
+                  </div>
+                  <Button type="submit" variant="outline-light">
+                    Sign In
+                  </Button>
+                </div>
+              </Form>
+            )}
+          </Formik>
+        </div>
       </div>
     </div>
   );

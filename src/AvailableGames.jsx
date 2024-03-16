@@ -16,13 +16,21 @@ import { Container, Row, Col } from "react-bootstrap";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import Form from "react-bootstrap/Form";
+import Dropdown from "react-bootstrap/Dropdown";
+import DropdownButton from "react-bootstrap/DropdownButton";
+import Carousel from "react-bootstrap/Carousel";
 
 function Avilablegame() {
   const [data, setData] = useState({});
+  const [carouseldata, setcarouselData] = useState([{}]);
+  const [isLoading, setLoading] = useState(false);
+
+  const [pagedata, setpageData] = useState({});
   const [show, setShow] = useState(false);
   // const [active, setActive] = useState(1);
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [currentPa, setCurrentPa] = useState(1);
   const [selectedTitle, setSelectedTitle] = useState("");
   const [selectedPrice, setSelectedPrice] = useState("");
   const [selectedDiscountprice, setSelectedDiscountprice] = useState("");
@@ -49,16 +57,48 @@ function Avilablegame() {
     console.log(page);
   }
 
-  useEffect(() => {
-    fetch(`http://localhost:2001/avgames/list/${currentPage - 1}/8`)
-      .then((response) => response.json())
-      .then((data) => {
-        setData(data);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-  }, [currentPage]);
+  function handlePaChange(page) {
+    setCurrentPa(page);
+    console.log(page);
+  }
+
+  useEffect(
+    () => {
+      function simulateNetworkRequest() {
+        return new Promise((resolve) => setTimeout(resolve, 2000));
+      }
+
+      fetch(`http://localhost:2001/avgames/list/${currentPage - 1}/4`)
+        .then((response) => response.json())
+        .then((data) => {
+          setData(data);
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+        });
+
+      fetch("http://localhost:2001/avgames/getAllGameData")
+        .then((response) => response.json())
+        .then((data) => {
+          setcarouselData(data);
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+        });
+
+      fetch(`http://localhost:2001/avgames/list/${currentPa - 1}/4`)
+        .then((response) => response.json())
+        .then((data) => {
+          setpageData(data);
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+        });
+    },
+    [currentPage, currentPa],
+    []
+  );
+
   const styles = {
     container: {
       backgroundImage: `url(${backgroundImage})`,
@@ -66,7 +106,7 @@ function Avilablegame() {
       backgroundAttachment: "fixed",
       backgroundPosition: "center",
       backgroundRepeat: "no-repeat",
-      height: "auto",
+      height: "100%",
       // width: "100%",
     },
   };
@@ -81,8 +121,7 @@ function Avilablegame() {
           style={{
             borderRadius: "60px",
             height: "auto",
-            background:'transparent',
-            backdropFilter:'blur(10px)',
+            background: "transparent",
           }} // Add style for rounded edges
         >
           <Container>
@@ -115,9 +154,6 @@ function Avilablegame() {
                 <div className="d-flex justify-content-around">
                   <Nav.Link className="text-light" href="/loginform">
                     <i className="bi bi-person-circle fs-3"></i>
-                  </Nav.Link>
-                  <Nav.Link className="text-light" href="/registerform">
-                    <i className="bi bi-person-fill-add fs-3"></i>
                   </Nav.Link>
                 </div>
               </Nav>
@@ -153,14 +189,13 @@ function Avilablegame() {
               {/* </div> */}
             </Container>
           </div>
-          <div className="fs-2 mb-4 mt-3 row d-flex justify-content-center"></div>
           {Array.isArray(data) &&
             data.slice(0, 101).map((arr) => (
               <div className="col" key={arr.agid}>
                 <Card style={{ width: "18rem" }} className="bg-transparent">
                   <Card.Img
                     variant="top"
-                    src={ "http://localhost:2001/uploads/" + arr.imgUrl}
+                    src={"http://localhost:2001/uploads/" + arr.imgUrl}
                     style={{ height: "400px" }}
                   />
                   <Card.Body className="bg-transparent">
@@ -251,21 +286,103 @@ function Avilablegame() {
                                     <Modal.Header closeButton>
                                       <Modal.Title id="example-custom-modal-styling-title">
                                         {selectedTitle}
-                                        {/* {selectedImgurl} */}
                                       </Modal.Title>
                                     </Modal.Header>
-                                    <Modal.Body
-                                      style={{
-                                        backgroundImage: `url(${selectedImgurl})`,
-                                        backgroundRepeat: "no-repeat",
-                                        backgroundPosition: "center",
-                                        backgroundSize: "cover",
-                                        height: "100%",
-                                      }}
-                                    >
-                                      <p>{selectedDiscount}</p>
-                                      <p>{selectedDiscountprice}</p>
-                                      <p>{selectedPrice}</p>
+                                    <Modal.Body>
+                                      <div className="row d-flex">
+                                        <div className="col">
+                                          <img
+                                            src={
+                                              "http://localhost:2001/uploads/" +
+                                              selectedImgurl
+                                            }
+                                            alt=""
+                                            height={"250px"}
+                                            width={"500px"}
+                                            style={{
+                                              backgroundRepeat: "no-repeat",
+                                              backgroundPosition: "center",
+                                              backgroundSize: "cover",
+                                            }}
+                                          />
+                                        </div>
+                                        <div className="col d-grid">
+                                          {/* <div
+                                            style={{ fontFamily: "cursive" }}
+                                            className=""
+                                          >
+                                            {selectedTitle}
+                                          </div> */}
+                                          <div className="d-flex justify-content-around">
+                                            <div>
+                                              MicroSoft Studios - Racing &
+                                              flying{" "}
+                                            </div>
+                                            <div className="text-warning">
+                                              <i class="bi bi-star"></i>
+                                              <i class="bi bi-star"></i>
+                                              <i class="bi bi-star"></i>
+                                              <i class="bi bi-star"></i>
+                                            </div>
+                                            <div>
+                                              <i class="bi bi-currency-rupee"></i>
+                                              {selectedDiscountprice}
+                                            </div>
+                                          </div>
+                                          <div className="d-flex justify-content-around">
+                                            <div>
+                                              Optimized for{" "}
+                                              <i class="bi bi-xbox"></i> Xbox
+                                              Series
+                                            </div>
+                                            <div>
+                                              <i class="bi bi-truck"></i>Smart
+                                              Delivery
+                                            </div>
+                                            <div>
+                                              <i class="bi bi-universal-access-circle"></i>
+                                              Accessibility features
+                                            </div>
+                                            <div>17 Supported languages</div>
+                                          </div>
+                                          <div className="mt-4 row me-4">
+                                            <div className="col">
+                                              <Button variant="outline-danger">
+                                                GetGamePass
+                                              </Button>
+                                            </div>
+                                            <div className="col">
+                                              <Button variant="outline-danger">
+                                                <div>
+                                                  Buy
+                                                  <i class="bi bi-currency-rupee"></i>
+                                                  {selectedPrice}
+                                                </div>
+                                              </Button>
+                                            </div>
+                                            <div className="col">
+                                              <DropdownButton
+                                                id="dropdown-basic-button"
+                                                title="Choose Edition"
+                                                variant="outline-danger"
+                                              >
+                                                <Dropdown.Item href="#/action-1">
+                                                  Action
+                                                </Dropdown.Item>
+                                                <Dropdown.Item href="#/action-2">
+                                                  Another action
+                                                </Dropdown.Item>
+                                                <Dropdown.Item href="#/action-3">
+                                                  Something else
+                                                </Dropdown.Item>
+                                              </DropdownButton>
+                                            </div>
+                                          </div>
+                                          {/* <p>{selectedDiscount}</p>
+                                          <p>{selectedDiscountprice}</p>
+                                          <p>{selectedPrice}</p> */}
+                                        </div>
+                                      </div>
                                     </Modal.Body>
                                   </Modal>
                                 </Stack>
@@ -279,6 +396,306 @@ function Avilablegame() {
                 </Card>
               </div>
             ))}
+        </div>
+      </div>
+
+      <div>
+        <Container>
+          <Carousel fade interval={3000} pause="hover">
+            {carouseldata.map((p) => (
+              <Carousel.Item key={p.agid}>
+                <img
+                  src={"http://localhost:2001/uploads/" + p.imgUrl}
+                  alt=""
+                  height={"500px"}
+                  width={"100%"}
+                  style={{
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "center",
+                    backgroundSize: "cover",
+                    // filter:"contrast(40%)",
+                    // filter:"blur(10px)",
+                  }}
+                />
+                <Carousel.Caption>
+                  <div className="col d-grid">
+                    {/* <div
+                                            style={{ fontFamily: "cursive" }}
+                                            className=""
+                                          >
+                                            {selectedTitle}
+                                          </div> */}
+                    <div className="d-flex justify-content-around">
+                      <div>MicroSoft Studios - Racing & flying </div>
+                      <div className="text-warning">
+                        <i class="bi bi-star"></i>
+                        <i class="bi bi-star"></i>
+                        <i class="bi bi-star"></i>
+                        <i class="bi bi-star"></i>
+                      </div>
+                      <div>
+                        <i class="bi bi-currency-rupee"></i>
+                        {p.discountprice}
+                      </div>
+                    </div>
+                    <div className="d-flex justify-content-around">
+                      <div>
+                        Optimized for <i class="bi bi-xbox"></i> Xbox Series
+                      </div>
+                      <div>
+                        <i class="bi bi-truck"></i>Smart Delivery
+                      </div>
+                      <div>
+                        <i class="bi bi-universal-access-circle"></i>
+                        Accessibility features
+                      </div>
+                      <div>17 Supported languages</div>
+                    </div>
+                  </div>
+                </Carousel.Caption>
+              </Carousel.Item>
+            ))}
+          </Carousel>
+        </Container>
+      </div>
+
+      <div>
+        <div className="container-fluid overflow-hidden">
+          <div
+            className="row ms-4 me-4 g-4 mt-4 mb-5"
+            style={{ height: "auto" }}
+          >
+            <div>
+              <Container className="d-flex justify-content-between align-items-center">
+                <div
+                  style={{ fontFamily: "cursive" }}
+                  className="fs-4 text-light"
+                >
+                  Free to play
+                </div>
+                <div
+                  style={{ fontFamily: "cursive" }}
+                  className="fs-4 text-light"
+                >
+                  <Button variant="outline-warning">Click To Play</Button>
+                </div>
+                <Pagination className="mt-4">
+                  <Pagination.Prev
+                    onClick={() => handlePaChange(currentPa - 1)}
+                    disabled={currentPa === 1}
+                  >
+                    <MdArrowCircleLeft className="text-dark fs-4" />
+                  </Pagination.Prev>
+                  <Pagination.Next
+                    onClick={() => handlePaChange(currentPa + 1)}
+                    disabled={currentPa === 11}
+                  >
+                    <MdArrowCircleRight className="text-dark fs-4" />
+                  </Pagination.Next>
+                </Pagination>
+              </Container>
+            </div>
+            {Array.isArray(pagedata) &&
+              pagedata.slice(0, 101).map((arr) => (
+                <div className="col" key={arr.agid}>
+                  <Card style={{ width: "18rem" }} className="bg-transparent">
+                    <Card.Img
+                      variant="top"
+                      src={"http://localhost:2001/uploads/" + arr.imgUrl}
+                      style={{ height: "400px" }}
+                    />
+                    <Card.Body className="bg-transparent">
+                      <div
+                        className="accordion-container"
+                        style={{ backgroundColor: "transparent" }}
+                      >
+                        <Accordion style={{ borderRadius: "50%" }}>
+                          <Accordion.Item eventKey="0">
+                            <Accordion.Header>
+                              <Button variant="outline-dark">
+                                <Card.Title
+                                  className=""
+                                  style={{
+                                    fontFamily: "cursive",
+                                  }}
+                                >
+                                  {arr.gametitle}
+                                </Card.Title>
+                              </Button>
+                            </Accordion.Header>
+                            <Accordion.Body>
+                              <ListGroup className="list-group-flush">
+                                <ListGroup.Item>
+                                  <Stack direction="horizontal" gap={2}>
+                                    <Badge bg="secondary">Price :</Badge>
+                                    <Badge bg="secondary">{arr.price}</Badge>
+                                  </Stack>
+                                </ListGroup.Item>
+                                <ListGroup.Item>
+                                  <Stack direction="horizontal" gap={2}>
+                                    <Badge bg="secondary">
+                                      DiscountPrice :
+                                    </Badge>
+                                    <Badge bg="secondary">
+                                      {arr.discountprice}
+                                    </Badge>
+                                  </Stack>
+                                </ListGroup.Item>
+                                <ListGroup.Item>
+                                  <Stack direction="horizontal" gap={2}>
+                                    <Badge bg="secondary">Discount :</Badge>
+                                    <Badge bg="secondary">{arr.discount}</Badge>
+                                  </Stack>
+                                </ListGroup.Item>
+                              </ListGroup>
+                              <Card.Body className="d-flex">
+                                <Card.Link
+                                  href="#"
+                                  style={{ textDecoration: "none" }}
+                                >
+                                  <Stack direction="horizontal" gap={2}>
+                                    <Badge pill bg="primary">
+                                      Play Now
+                                    </Badge>
+                                  </Stack>
+                                </Card.Link>
+                                <Card.Link
+                                  href="#"
+                                  style={{ textDecoration: "none" }}
+                                >
+                                  <Stack direction="horizontal" gap={2}>
+                                    <Badge
+                                      pill
+                                      variant="primary"
+                                      onClick={() =>
+                                        handleBadgeTitle(
+                                          arr.gametitle,
+                                          arr.price,
+                                          arr.discountprice,
+                                          arr.discount,
+                                          arr.imgUrl
+                                        )
+                                      }
+                                    >
+                                      Quick Look
+                                    </Badge>
+                                    <Modal
+                                      size="xl"
+                                      centered
+                                      show={show}
+                                      onHide={() => setShow(false)}
+                                      style={{
+                                        backgroundImage: `url(${backgroundImage})`,
+                                        backgroundRepeat: "no-repeat",
+                                        backgroundPosition: "center",
+                                        backgroundSize: "cover",
+                                      }}
+                                    >
+                                      <Modal.Header closeButton>
+                                        <Modal.Title id="example-custom-modal-styling-title">
+                                          {selectedTitle}
+                                        </Modal.Title>
+                                      </Modal.Header>
+                                      <Modal.Body>
+                                        <div className="row d-flex">
+                                          <div className="col">
+                                            <img
+                                              src={
+                                                "http://localhost:2001/uploads/" +
+                                                selectedImgurl
+                                              }
+                                              alt=""
+                                              height={"250px"}
+                                              width={"500px"}
+                                              style={{
+                                                backgroundRepeat: "no-repeat",
+                                                backgroundPosition: "center",
+                                                backgroundSize: "cover",
+                                              }}
+                                            />
+                                          </div>
+                                          <div className="col d-grid">
+                                            <div className="d-flex justify-content-around">
+                                              <div>
+                                                MicroSoft Studios - Racing &
+                                                flying{" "}
+                                              </div>
+                                              <div className="text-warning">
+                                                <i class="bi bi-star"></i>
+                                                <i class="bi bi-star"></i>
+                                                <i class="bi bi-star"></i>
+                                                <i class="bi bi-star"></i>
+                                              </div>
+                                              <div>
+                                                <i class="bi bi-currency-rupee"></i>
+                                                {selectedDiscountprice}
+                                              </div>
+                                            </div>
+                                            <div className="d-flex justify-content-around">
+                                              <div>
+                                                Optimized for{" "}
+                                                <i class="bi bi-xbox"></i> Xbox
+                                                Series
+                                              </div>
+                                              <div>
+                                                <i class="bi bi-truck"></i>Smart
+                                                Delivery
+                                              </div>
+                                              <div>
+                                                <i class="bi bi-universal-access-circle"></i>
+                                                Accessibility features
+                                              </div>
+                                              <div>17 Supported languages</div>
+                                            </div>
+                                            <div className="mt-4 row me-4">
+                                              <div className="col">
+                                                <Button variant="outline-danger">
+                                                  GetGamePass
+                                                </Button>
+                                              </div>
+                                              <div className="col">
+                                                <Button variant="outline-danger">
+                                                  <div>
+                                                    Buy
+                                                    <i class="bi bi-currency-rupee"></i>
+                                                    {selectedPrice}
+                                                  </div>
+                                                </Button>
+                                              </div>
+                                              <div className="col">
+                                                <DropdownButton
+                                                  id="dropdown-basic-button"
+                                                  title="Choose Edition"
+                                                  variant="outline-danger"
+                                                >
+                                                  <Dropdown.Item href="#/action-1">
+                                                    Action
+                                                  </Dropdown.Item>
+                                                  <Dropdown.Item href="#/action-2">
+                                                    Another action
+                                                  </Dropdown.Item>
+                                                  <Dropdown.Item href="#/action-3">
+                                                    Something else
+                                                  </Dropdown.Item>
+                                                </DropdownButton>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </Modal.Body>
+                                    </Modal>
+                                  </Stack>
+                                </Card.Link>
+                              </Card.Body>
+                            </Accordion.Body>
+                          </Accordion.Item>
+                        </Accordion>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </div>
+              ))}
+          </div>
         </div>
       </div>
     </div>

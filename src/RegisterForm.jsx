@@ -1,19 +1,34 @@
 import React, { useState } from "react";
 import Button from "react-bootstrap/Button";
-import { Container, Row, Col, Form } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
+import Form from "react-bootstrap/Form";
 import "./App.css";
 import { InputGroup } from "react-bootstrap";
 import { BiShow, BiHide } from "react-icons/bi";
+import * as formik from "formik";
+import * as yup from "yup";
+import { useNavigate } from "react-router-dom";
 
-const RegisterForm = () => {
+function RegisterForm() {
+  const { Formik } = formik;
+  const navigate = useNavigate();
+
+  const schema = yup.object().shape({
+    name: yup.string().required(),
+    email: yup
+      .string()
+      .matches(/^[a-z]+\d*@gmail\.com$/, "Invalid email format")
+      .required(),
+    password: yup.string().required(),
+  });
+
   const [registerData, setRegisterData] = useState({
     username: "",
     email: "",
     password: "",
-    agreed: false,
   });
 
-  const [validated, setValidated] = useState(false); // State for form validation
+  // const [validated, setValidated] = useState(false);
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -21,39 +36,38 @@ const RegisterForm = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleChange = (event) => {
-    const { name, value, type, checked } = event.target;
-    const val = type === "checkbox" ? checked : value;
-    setRegisterData({ ...registerData, [name]: val });
-  };
-
-  const handleRegister = async (event) => {
-    event.preventDefault();
-    const form = event.currentTarget;
-
-    if (form.checkValidity() === false) {
-      event.stopPropagation();
-    } else {
-      try {
-        const response = await fetch(`http://localhost:2001/register/set`, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          method: "POST",
-          body: JSON.stringify(registerData),
-        });
-
+  const handleSubmit = (val, { setSubmitting }) => {
+    // event.preventDefault();
+    console.log("SUBMITTING FORM:", val);
+    fetch("http://localhost:2001/register/set", {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "post",
+      body: JSON.stringify(val),
+    })
+      .then((response) => {
         if (!response.ok) {
-          throw new Error("Failed to register");
+          throw new Error("Failed to fetch data");
         } else {
-          console.log("Register received", response.json());
+          return response.json();
         }
-      } catch (error) {
-        console.error("Error during register", error);
-      }
-      console.log("Signing Up...");
-    }
-    setValidated(true);
+      })
+      .then((response) => {
+        if (response == true) {
+          console.log("the Fectched data is", response);
+          setRegisterData(response);
+          navigate("/loginform");
+        } else {
+          alert("Username already exists");
+        }
+      })
+      .catch((e) => {
+        console.log("error", e);
+      })
+      .finally(() => {
+        setSubmitting(false);
+      });
   };
 
   return (
@@ -63,126 +77,126 @@ const RegisterForm = () => {
     >
       <div
         style={{
-          backgroundColor: "#bdc3c7", // Background color of the box
-          padding: "20px", // Padding inside the box
-          borderRadius: "10px", // Rounded corners
-          boxShadow: "0 4px 8px rgba(0.5, 0.5, 0.5, .5)", // Shadow effect
+          backgroundColor: "#bdc3c7",
+          padding: "20px",
+          borderRadius: "10px",
+          boxShadow: "0 4px 8px rgba(0.5, 0.5, 0.5, .5)",
         }}
       >
         <div className="text-center">
           <Button className="fs-2 mb-3" variant="outline-dark">
-            <i class="bi bi-person-check"></i>
+            <i className="bi bi-person-check"></i>
           </Button>
         </div>
         <div className="text-dark text-center mb-3">
           <h1>Sign-Up</h1>
         </div>
-        <Form noValidate validated={validated} onSubmit={handleRegister}>
-          <Row className="mb-3 d-flex justify-content-center">
-            <Form.Group
-              as={Col}
-              md="8"
-              controlId="validationCustom01"
-              className="mt-3"
-            >
-              <Form.Control
-                type="text"
-                placeholder="Username"
-                name="username"
-                value={registerData.username}
-                onChange={handleChange}
-                required
-                style={{
-                  backgroundColor: "transparent",
-                  borderColor: "white",
-                  color: "white",
-                  "::placeholder": { color: "black" },
-                }}
-              />
-              <Form.Control.Feedback type="invalid" className="text-warning">
-                Please provide a username.
-              </Form.Control.Feedback>
-            </Form.Group>
-            <Form.Group
-              as={Col}
-              md="8"
-              controlId="validationCustom02"
-              className="mt-5"
-            >
-              <Form.Control
-                type="email"
-                placeholder="Email"
-                name="email"
-                value={registerData.email}
-                onChange={handleChange}
-                required
-                style={{
-                  backgroundColor: "transparent",
-                  borderColor: "white",
-                  color: "white",
-                  "::placeholder": { color: "black" },
-                }}
-              />
-              <Form.Control.Feedback type="invalid" className="text-warning">
-                Please provide an email.
-              </Form.Control.Feedback>
-            </Form.Group>
-            <Form.Group
-              as={Col}
-              md="8"
-              controlId="validationCustom03"
-              className="mt-5"
-            >
-              {/* Password Form Label */}
-
-              {/* Password Form Control */}
-              <InputGroup>
-                <Form.Control
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Password"
-                  name="password"
-                  value={registerData.password}
-                  onChange={handleChange}
-                  required
-                  style={{
-                    backgroundColor: "transparent",
-                    borderColor: "white",
-                    color: "white",
-                    "::placeholder": { color: "black" },
-                  }}
-                />
-                <Button
-                  variant="outline-light"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <BiShow /> : <BiHide />}
-                </Button>
-                <Form.Control.Feedback type="invalid" className="text-warning">
-                  Please provide a password.
-                </Form.Control.Feedback>
-              </InputGroup>
-            </Form.Group>
-          </Row>
-          <Form.Group className="text-white mb-3 d-flex justify-content-center align-items-center">
-            <Form.Check
-              label="Remember me"
-              feedback="You must agree before submitting."
-              feedbackType="invalid"
-              name="agreed"
-              checked={registerData.agreed}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-          <div className="text-center mt-4 mb-3">
-            <Button type="submit" variant="outline-light">
-              Sign Up
-            </Button>
-          </div>
-        </Form>
+        <div>
+          <Formik
+            validationSchema={schema}
+            onSubmit={handleSubmit}
+            initialValues={{
+              username: "",
+              email: "",
+              password: "",
+            }}
+          >
+            {({ handleSubmit, handleChange, values, errors }) => (
+              <Form noValidate onSubmit={handleSubmit}>
+                <Row className="mb-3 d-flex justify-content-center">
+                  <Form.Group
+                    as={Col}
+                    md="8"
+                    controlId="validationFormik03"
+                    className="mt-3"
+                  >
+                    <Form.Control
+                      type="text"
+                      placeholder="Username"
+                      name="username"
+                      value={values.username}
+                      onChange={handleChange}
+                      isInvalid={!!errors.username}
+                      style={{
+                        backgroundColor: "transparent",
+                        borderColor: "white",
+                        color: "white",
+                        "::placeholder": { color: "black" },
+                      }}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.username}
+                    </Form.Control.Feedback>
+                  </Form.Group>
+                  <Form.Group
+                    as={Col}
+                    md="8"
+                    controlId="validationFormik04"
+                    className="mt-5"
+                  >
+                    <Form.Control
+                      type="email"
+                      placeholder="Email"
+                      name="email"
+                      value={values.email}
+                      onChange={handleChange}
+                      isInvalid={!!errors.email}
+                      style={{
+                        backgroundColor: "transparent",
+                        borderColor: "white",
+                        color: "white",
+                        "::placeholder": { color: "black" },
+                      }}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.email}
+                    </Form.Control.Feedback>
+                  </Form.Group>
+                  <Form.Group
+                    as={Col}
+                    md="8"
+                    controlId="validationFormik05"
+                    className="mt-5"
+                  >
+                    <InputGroup>
+                      <Form.Control
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Password"
+                        name="password"
+                        value={values.password}
+                        onChange={handleChange}
+                        isInvalid={!!errors.password}
+                        style={{
+                          backgroundColor: "transparent",
+                          borderColor: "white",
+                          color: "white",
+                          "::placeholder": { color: "black" },
+                        }}
+                      />
+                      <Button
+                        variant="outline-light"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <BiShow /> : <BiHide />}
+                      </Button>
+                      <Form.Control.Feedback type="invalid">
+                        {errors.password}
+                      </Form.Control.Feedback>
+                    </InputGroup>
+                  </Form.Group>
+                </Row>
+                <div className="text-center mt-4 mb-3">
+                  <Button type="submit" variant="outline-light">
+                    Sign Up
+                  </Button>
+                </div>
+              </Form>
+            )}
+          </Formik>
+        </div>
       </div>
     </div>
   );
-};
+}
 
 export default RegisterForm;
