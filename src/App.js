@@ -10,8 +10,11 @@ import { Container, Row, Col } from "react-bootstrap";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import Form from "react-bootstrap/Form";
+import '@fortawesome/fontawesome-free/css/all.min.css';
+
 
 function App() {
+  
   return (
     <div>
       <BrowserRouter>

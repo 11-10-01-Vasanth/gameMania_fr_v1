@@ -36,38 +36,29 @@ function RegisterForm() {
     setShowPassword(!showPassword);
   };
 
-  const handleSubmit = (val, { setSubmitting }) => {
+  const handleSubmit = async (val, { setSubmitting }) => {
     // event.preventDefault();
     console.log("SUBMITTING FORM:", val);
-    fetch("http://localhost:2001/register/set", {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "post",
-      body: JSON.stringify(val),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to fetch data");
-        } else {
-          return response.json();
-        }
-      })
-      .then((response) => {
-        if (response == true) {
-          console.log("the Fectched data is", response);
-          setRegisterData(response);
-          navigate("/loginform");
-        } else {
-          alert("Username already exists");
-        }
-      })
-      .catch((e) => {
-        console.log("error", e);
-      })
-      .finally(() => {
-        setSubmitting(false);
+    try {
+      const response = await fetch("http://localhost:2001/user/register", {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "post",
+        body: JSON.stringify(val),
       });
+      const responseData = await response.json();
+      if (responseData) {
+        console.log("the Fectched data is", responseData);
+        setRegisterData(responseData);
+        navigate("/loginform");
+      } else {
+        alert("Username already exists");
+      }
+    } catch (e) {
+      console.log("error", e);
+    }
+    setSubmitting(false);
   };
 
   return (
@@ -101,7 +92,7 @@ function RegisterForm() {
               password: "",
             }}
           >
-            {({ handleSubmit, handleChange, values, errors }) => (
+            {({ handleSubmit, handleChange, values, touched, errors }) => (
               <Form noValidate onSubmit={handleSubmit}>
                 <Row className="mb-3 d-flex justify-content-center">
                   <Form.Group

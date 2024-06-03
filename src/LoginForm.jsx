@@ -29,37 +29,33 @@ const LoginForm = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleSubmit = (val, { setSubmitting }) => {
+  const handleSubmit = async (val, { setSubmitting }) => {
     // event.preventDefault();
     console.log("SUBMITTING FORM:", val);
-    fetch("http://localhost:2001/register/login", {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "post",
-      body: JSON.stringify(val),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to fetch data");
-        }
-        return response.json();
-      })
-      .then((response) => {
-        if (response == true) {
-          console.log("the Fectched data is", response);
-          setLoginData(response);
-          navigate("/");
-        } else {
-          alert("Invalid login data");
-        }
-      })
-      .catch((e) => {
-        console.log("error", e);
-      })
-      .finally(() => {
-        setSubmitting(false);
+    try {
+      const response = await fetch("http://localhost:2001/user/login", {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "post",
+        body: JSON.stringify(val),
       });
+      const responseData = await response.json();
+      // localStorage.setItem("authToken", responseData);
+
+      if (responseData) {
+        console.log("the Fectched data is", response);
+        // const tokenResponse = localStorage.getItem("authToken");
+        setLoginData(response);
+        // console.log("token", tokenResponse);
+        navigate("/");
+      } else {
+        alert("Invalid login data");
+      }
+      setSubmitting(false);
+    } catch (e) {
+      console.log("error", e);
+    }
   };
 
   return (
@@ -118,7 +114,7 @@ const LoginForm = () => {
                       }}
                     />
                     <Form.Control.Feedback type="invalid">
-                      {errors.username}
+                      {/* {errors.username} */}
                     </Form.Control.Feedback>
                   </Form.Group>
 
@@ -151,7 +147,7 @@ const LoginForm = () => {
                         {showPassword ? <BiShow /> : <BiHide />}
                       </Button>
                       <Form.Control.Feedback type="invalid">
-                        {errors.password}
+                        {/* {errors.password} */}
                       </Form.Control.Feedback>
                     </InputGroup>
                   </Form.Group>
